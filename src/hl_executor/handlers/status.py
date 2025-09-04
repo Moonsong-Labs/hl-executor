@@ -38,15 +38,6 @@ def _normalize_positions(raw_positions: List[Dict[str, Any]]) -> List[Dict[str, 
     return normalized
 
 
-def _render_header(console: Console, address: str, environment: str) -> None:
-    hdr = Table(show_header=False, box=None, padding=(0, 1))
-    hdr.add_column("k", style="bold cyan", no_wrap=True)
-    hdr.add_column("v")
-    hdr.add_row("Environment", environment)
-    hdr.add_row("Account", address)
-    console.print(hdr)
-
-
 def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None:
     if not positions:
         console.print(Text("No open positions", style="dim"))
@@ -176,8 +167,6 @@ def run(production: bool, private_key: str | None, account_address: str | None) 
         open_orders = []
 
     console = Console()
-    environment = "production" if production else "testnet"
-    _render_header(console, address, environment)
     _space(console, 1)
     _render_positions(console, positions)
     _space(console, 1)

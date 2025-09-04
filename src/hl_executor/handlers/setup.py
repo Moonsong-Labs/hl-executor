@@ -5,6 +5,8 @@ from hyperliquid.utils import constants
 from hyperliquid.exchange import Exchange
 import eth_account
 from eth_account.signers.local import LocalAccount
+from rich.table import Table
+from rich.console import Console
 
 import click
 import os
@@ -53,6 +55,26 @@ def setup(
     exchange = Exchange(wallet=account, base_url=base_url, account_address=address)
 
     env_label = "production" if production else "testnet"
-    click.echo(f"Connected to {env_label}:{address} with {account.address}")
+    console = Console()
+    _render_header(console, address, account.address, env_label)
 
     return info, exchange, address
+
+
+def _render_header(
+    console: Console, address: str, signer: str, environment: str
+) -> None:
+    hdr = Table(
+        show_header=False,
+        box=None,
+        padding=(0, 1),
+        title="Session Info",
+        title_style="bold bright_cyan",
+        title_justify="left",
+    )
+    hdr.add_column("k", style="bold cyan", no_wrap=True)
+    hdr.add_column("v")
+    hdr.add_row("Environment", environment)
+    hdr.add_row("HL Account", address)
+    hdr.add_row("Signer", signer)
+    console.print(hdr)

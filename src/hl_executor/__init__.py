@@ -1,7 +1,6 @@
 import click
 from pathlib import Path
 from dotenv import load_dotenv
-
 from .handlers.status import run as status_run
 
 
