@@ -35,8 +35,8 @@ jobs:
       - name: Check formatting
         run: uv run ruff format --check .
 
-  mypy:
-    name: Mypy Type Check
+  pyrefly:
+    name: Pyrefly Type Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,7 +48,7 @@ jobs:
       - name: Sync project dependencies (frozen)
         run: uv sync --frozen
       - name: Type check
-        run: uv run mypy
+        run: uv run pyrefly check
 
   cli_help:
     name: CLI --help
