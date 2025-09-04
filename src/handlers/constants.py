@@ -7,7 +7,7 @@ USDC_ARB_TEST_ADDR = "0x1baabb04529d43a73232b713c0fe471f7c7334d5"
 HYPEREVM_TEST_RPC = "https://rpc.hyperliquid-testnet.xyz/evm"
 HYPEREVM_PROD_RPC = "https://rpc.hyperliquid.xyz/evm"
 
-ARB_TEST_RPC = "https://arbitrum-sepolia.therpc.io"
+ARB_TEST_RPC = "https://arbitrum-sepolia-rpc.publicnode.com"
 ARB_PROD_RPC = "https://arb-one-mainnet.gateway.tatum.io"
 
 

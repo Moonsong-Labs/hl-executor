@@ -3,44 +3,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from handlers.status import run as status_run
 from handlers.deposit import run as deposit_run
+from handlers.place_order import run as order_run
 
 
 @click.group()
-@click.option(
-    "--private-key",
-    "private_key",
-    type=str,
-    required=False,
-    help="Private key for signing transactions",
-)
-@click.option(
-    "--production",
-    "production",
-    is_flag=True,
-    help="Connect to the production environment (default is testnet)",
-)
-@click.option(
-    "--address",
-    "account_address",
-    type=str,
-    required=False,
-    help="This the HL account address which the Action will be performed on",
-)
-@click.pass_context
-def cli(
-    ctx: click.Context,
-    private_key: str | None,
-    production: bool,
-    account_address: str | None,
-):
+def cli():
     """HyperLiquid Executor - Python CLI"""
-
     load_dotenv(Path.cwd() / ".env", override=False)
-
-    ctx.ensure_object(dict)
-    ctx.obj["private_key"] = private_key
-    ctx.obj["production"] = production
-    ctx.obj["account_address"] = account_address
 
 
 @cli.command()
@@ -64,25 +33,69 @@ def cli(
     required=False,
     help="This the HL account address which the Action will be performed on",
 )
-@click.pass_context
 def status(
-    ctx: click.Context,
     private_key: str | None,
     production: bool,
     account_address: str | None,
 ):
     """Get positions and open orders for the account"""
-    status_run(
-        ctx.obj.get("production", False),
-        ctx.obj.get("private_key"),
-        ctx.obj.get("account_address"),
-    )
+    status_run(production, private_key, account_address)
 
 
 @cli.command()
-def order():
+@click.argument(
+    "direction",
+    type=str,
+)
+@click.argument(
+    "market",
+    type=str,
+)
+@click.argument(
+    "amount",
+    type=str,
+)
+@click.argument(
+    "price",
+    type=str,
+)
+@click.option(
+    "--private-key",
+    "private_key",
+    type=str,
+    required=False,
+    help="Private key for signing transactions",
+)
+@click.option(
+    "--production",
+    "production",
+    is_flag=True,
+    help="Connect to the production environment (default is testnet)",
+)
+@click.option(
+    "--address",
+    "account_address",
+    type=str,
+    required=False,
+    help="This the HL account address which the Action will be performed on",
+)
+def order(
+    amount: str,
+    direction: str,
+    price: str,
+    private_key: str | None,
+    production: bool,
+    account_address: str | None,
+):
     """Place Limit Order"""
-    click.echo("Welcome to the Place Limit Order command!")
+    order_run(
+        amount,
+        direction,
+        price,
+        private_key,
+        production,
+        account_address,
+    )
 
 
 @cli.command()
@@ -110,21 +123,25 @@ def order():
     required=False,
     help="This the HL account address which the Action will be performed on",
 )
-@click.pass_context
 def deposit(
-    ctx: click.Context,
     amount: str,
     private_key: str | None,
     production: bool,
     account_address: str | None,
 ):
-    """Deposit Funds from EVM -> Core"""
+    """Deposit Funds from ARB -> Core"""
     deposit_run(
-        ctx.obj.get("production", False),
-        ctx.obj.get("private_key"),
-        ctx.obj.get("account_address"),
+        production,
+        private_key,
+        account_address,
         amount,
     )
+
+
+@cli.command()
+def leverage():
+    """Change the leverage of a market"""
+    click.echo("Welcome to the Withdraw Funds from Core -> EVM command!")
 
 
 @cli.command()
