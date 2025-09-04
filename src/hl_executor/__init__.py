@@ -23,7 +23,7 @@ def deposit():
     click.echo("Welcome to the Deposit Funds from EVM -> Core command!")
 
 @cli.command()
-def withdraw():
+def withdraw():    
     """Withdraw Funds from Core -> EVM"""
     click.echo("Welcome to the Withdraw Funds from Core -> EVM command!")
 
