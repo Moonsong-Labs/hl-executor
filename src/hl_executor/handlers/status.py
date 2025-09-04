@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Tuple
 import click
 
 from .setup import setup
-from ..utils.cleanup import cleanup_clients
 
 
 def _try_info_open_orders(info: Any, address: str) -> List[Dict[str, Any]]:
@@ -22,7 +21,9 @@ def _try_info_open_orders(info: Any, address: str) -> List[Dict[str, Any]]:
     return []
 
 
-def _extract_from_user_state(state: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+def _extract_from_user_state(
+    state: Dict[str, Any],
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """Extract positions and orders from a generic user_state response."""
     positions = state.get("assetPositions") or state.get("positions") or []
 
@@ -41,40 +42,36 @@ def _extract_from_user_state(state: Dict[str, Any]) -> Tuple[List[Dict[str, Any]
     return positions, orders
 
 
-def run(production: bool, private_key: str | None) -> None:
+def run(production: bool, private_key: str | None, account_address: str | None) -> None:
     """Get positions and open orders for the provided private key."""
     info = exchange = address = None  # for finally-scope
-    try:
-        info, exchange, address = setup(production, private_key)
+    info, exchange, address = setup(production, private_key, account_address)
 
-        positions: List[Dict[str, Any]] = []
-        open_orders: List[Dict[str, Any]] = []
+    positions: List[Dict[str, Any]] = []
+    open_orders: List[Dict[str, Any]] = []
 
-        state = None
-        for meth in ("user_state", "userState", "get_user_state"):
-            if hasattr(info, meth):
-                try:
-                    state = getattr(info, meth)(address)
-                    break
-                except Exception:
-                    state = None
+    state = None
+    for meth in ("user_state", "userState", "get_user_state"):
+        if hasattr(info, meth):
+            try:
+                state = getattr(info, meth)(address)
+                break
+            except Exception:
+                state = None
 
-        if isinstance(state, dict):
-            p, o = _extract_from_user_state(state)
-            positions = p or positions
-            open_orders = o or open_orders
+    if isinstance(state, dict):
+        p, o = _extract_from_user_state(state)
+        positions = p or positions
+        open_orders = o or open_orders
 
-        if not open_orders and info is not None:
-            open_orders = _try_info_open_orders(info, address)
+    if not open_orders and info is not None:
+        open_orders = _try_info_open_orders(info, address)
 
-        result = {
-            "address": address,
-            "environment": "production" if production else "testnet",
-            "positions": positions,
-            "open_orders": open_orders,
-        }
+    result = {
+        "address": address,
+        "environment": "production" if production else "testnet",
+        "positions": positions,
+        "open_orders": open_orders,
+    }
 
-        click.echo(json.dumps(result, indent=2))
-    finally:
-        # Ensure background WS/threads from SDK are torn down
-        cleanup_clients(info, exchange)
+    click.echo(json.dumps(result, indent=2))

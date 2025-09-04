@@ -29,7 +29,9 @@ def _best_effort_close(obj: Any) -> None:
         likely_attrs = [
             name
             for name in dir(obj)
-            if any(k in name.lower() for k in ("ws", "socket", "session", "client", "http"))
+            if any(
+                k in name.lower() for k in ("ws", "socket", "session", "client", "http")
+            )
         ]
     except Exception:
         likely_attrs = []
@@ -69,4 +71,3 @@ def cleanup_clients(*objs: Any) -> None:
         except Exception:
             # Never let cleanup raise
             pass
-
