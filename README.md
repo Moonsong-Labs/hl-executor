@@ -1,40 +1,47 @@
 # HyperLiquid Executor
 
-
 ## Usage
 
 ### Pre-requisites
 
+Install `uv` via their official [docs](https://docs.astral.sh/uv/#installation). The one-liner is:
+
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+> [!NOTE]  
+> `uv` is highly recommended to use, other package managers are untested on this repo.
+
 ### Installation
+
+```sh
+uv sync
+```
 
 ### Commands
 
 ```sh
-# Deposit USDC from EVM (Arbitrum) to HL core
-hlexec deposit \
-  --amount 10.5 \
-  [--production] \
-  [--rpc-url https://arb1.arbitrum.io/rpc] \
-  [--usdc-address 0x...] \
-  [--bridge-address 0x...]
+Usage: hlexec [OPTIONS] COMMAND [ARGS]...
+
+  HyperLiquid Executor - Python CLI
+
+Options:
+  --private-key TEXT  Private key for signing transactions
+  --production        Connect to the production environment (default is
+                      testnet)
+  --address TEXT      This the HL account address which the Action will be
+                      performed on
+  --help              Show this message and exit.
+
+Commands:
+  deposit   Deposit Funds from EVM -> Core
+  order     Place Limit Order
+  status    Get positions and open orders for the account
+  transfer  Transfer funds between vaults
+  withdraw  Withdraw Funds from Core -> EVM
 ```
 
-#### `Status` 
+#### `status`
 
-## Type Checking
-
-This project uses mypy for static type checking. Configuration lives in `pyproject.toml` under `[tool.mypy]` with a `src/` layout (`mypy_path = "src"` and `files = ["hl_executor"]`).
-
-Run mypy using your preferred workflow:
-
-- With uv (after syncing dev deps):
-  - `uv run mypy -p hl_executor`
-  - or `uv run python -m mypy -p hl_executor`
-
-- With an active virtualenv where mypy is installed:
-  - `python -m mypy -p hl_executor`
-  - or `mypy -p hl_executor`
-
-Notes:
-- Third‑party libs without type hints (e.g., `hyperliquid`, `web3`, `eth_account`) are silenced in config with per‑module ignores.
-- A `py.typed` marker is included so downstream users get type information when this package is distributed.
+#### `deposit <amount>`
