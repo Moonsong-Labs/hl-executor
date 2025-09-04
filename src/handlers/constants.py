@@ -3,3 +3,7 @@ BRIDGE2_TEST_ADDR = "0x08cfc1B6b2dCF36A1480b99353A354AA8AC56f89"
 
 USDC_ARB_PROD_ADDR = "0xaf88d065e77c8cc2239327c5edb3a432268e5831"
 USDC_ARB_TEST_ADDR = "0x1baabb04529d43a73232b713c0fe471f7c7334d5"
+
+
+HYPEREVM_TEST_RPC = "https://rpc.hyperliquid-testnet.xyz/evm"
+HYPEREVM_PROD_RPC = "https://rpc.hyperliquid.xyz/evm"

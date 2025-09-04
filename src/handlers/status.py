@@ -148,7 +148,7 @@ def _space(console: Console, lines: int = 1) -> None:
 
 def run(production: bool, private_key: str | None, account_address: str | None) -> None:
     """Get positions and open orders and render with Rich tables."""
-    info, _exchange, address = setup(production, private_key, account_address)
+    info, _exchange, address, _account = setup(production, private_key, account_address)
 
     try:
         state: Dict[str, Any] = info.user_state(address)

@@ -40,7 +40,7 @@ def _resolve_account_address(cli_account_address: Optional[str]) -> str:
 
 def setup(
     production: bool, private_key: Optional[str], account_address: Optional[str]
-) -> Tuple[Any, Any, str]:
+) -> Tuple[Any, Any, str, LocalAccount]:
     """Initialize Hyperliquid SDK clients and return (info, exchange, address).
 
     - If `private_key` is provided, use it; otherwise load from .env (PRIVATE_KEY).
@@ -58,7 +58,7 @@ def setup(
     console = Console()
     _render_header(console, address, account.address, env_label)
 
-    return info, exchange, address
+    return info, exchange, address, account
 
 
 def _render_header(
