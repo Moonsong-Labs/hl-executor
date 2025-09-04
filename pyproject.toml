@@ -14,11 +14,47 @@ dependencies = [
     "eth-account>=0.10.0",
     "dotenv>=0.9.9",
     "rich>=14.1.0",
+    "mypy>=1.17.1",
+    "ruff>=0.12.11",
 ]
 
 [project.scripts]
 hlexec = "hl_executor:cli"
 
 [build-system]
-requires = ["uv_build>=0.8.14,<0.9.0"]
-build-backend = "uv_build"
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["hl_executor", "constants"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["handlers*"]
+
+[tool.mypy]
+python_version = "3.10"
+# Ensure mypy resolves imports from the flat `src/` layout
+mypy_path = "src"
+# What to check by default when running just `mypy`
+files = ["src"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = true
+no_implicit_optional = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+  "hyperliquid",
+  "hyperliquid.*",
+  "eth_account",
+  "eth_account.*",
+  "web3",
+  "web3.*",
+  "dotenv",
+  "rich",
+  "rich.*",
+]
+ignore_missing_imports = true

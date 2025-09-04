@@ -1,7 +1,8 @@
 import click
 from pathlib import Path
 from dotenv import load_dotenv
-from .handlers.status import run as status_run
+from handlers.status import run as status_run
+from handlers.deposit import run as deposit_run
 
 
 @click.group()
@@ -43,8 +44,33 @@ def cli(
 
 
 @cli.command()
+@click.option(
+    "--private-key",
+    "private_key",
+    type=str,
+    required=False,
+    help="Private key for signing transactions",
+)
+@click.option(
+    "--production",
+    "production",
+    is_flag=True,
+    help="Connect to the production environment (default is testnet)",
+)
+@click.option(
+    "--address",
+    "account_address",
+    type=str,
+    required=False,
+    help="This the HL account address which the Action will be performed on",
+)
 @click.pass_context
-def status(ctx: click.Context):
+def status(
+    ctx: click.Context,
+    private_key: str | None,
+    production: bool,
+    account_address: str | None,
+):
     """Get positions and open orders for the account"""
     status_run(
         ctx.obj.get("production", False),
@@ -60,9 +86,45 @@ def order():
 
 
 @cli.command()
-def deposit():
+@click.argument(
+    "amount",
+    type=str,
+)
+@click.option(
+    "--private-key",
+    "private_key",
+    type=str,
+    required=False,
+    help="Private key for signing transactions",
+)
+@click.option(
+    "--production",
+    "production",
+    is_flag=True,
+    help="Connect to the production environment (default is testnet)",
+)
+@click.option(
+    "--address",
+    "account_address",
+    type=str,
+    required=False,
+    help="This the HL account address which the Action will be performed on",
+)
+@click.pass_context
+def deposit(
+    ctx: click.Context,
+    amount: str,
+    private_key: str | None,
+    production: bool,
+    account_address: str | None,
+):
     """Deposit Funds from EVM -> Core"""
-    click.echo("Welcome to the Deposit Funds from EVM -> Core command!")
+    deposit_run(
+        ctx.obj.get("production", False),
+        ctx.obj.get("private_key"),
+        ctx.obj.get("account_address"),
+        amount,
+    )
 
 
 @cli.command()
