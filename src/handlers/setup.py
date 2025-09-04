@@ -14,17 +14,17 @@ import click
 import os
 
 
-def _resolve_private_key(cli_private_key: Optional[str]) -> ChecksumAddress:
+def _resolve_private_key(cli_private_key: Optional[str]) -> str:
     """Choose private key from CLI if provided, else from env (.env loaded)."""
     if cli_private_key:
-        return Web3.to_checksum_address(cli_private_key)
+        return cli_private_key
 
     env_key = os.getenv("PRIVATE_KEY")
     if not env_key:
         raise click.ClickException(
             "Missing private key. Provide --private-key or set PRIVATE_KEY in .env"
         )
-    return Web3.to_checksum_address(env_key)
+    return env_key
 
 
 def _resolve_account_address(cli_account_address: Optional[str]) -> ChecksumAddress:
