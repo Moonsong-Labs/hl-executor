@@ -1,5 +1,4 @@
 from __future__ import annotations
-from hyperliquid.utils.types import Cloid
 from typing import Any
 from datetime import datetime
 import click
@@ -24,8 +23,22 @@ def _parse_order_response(response: dict) -> list[dict[str, str]]:
         return [{"error": f"Failed to parse API response: {e}"}]
 
 
-def _display_order_status(console: Console, order_info: dict) -> None:
-    """Display current order status in a formatted table."""
+def _display_order_status(console: Console, order_dict: dict) -> None:
+    """Display current order status in a formatted table.
+
+    Args:
+        console: Rich console for output
+        order_dict: Full order dictionary containing 'order' and optionally 'status'/'statusTimestamp'
+    """
+    if "order" in order_dict:
+        order_info = order_dict["order"].get("order", order_dict["order"])
+        status = order_dict["order"].get("status", "N/A")
+        status_timestamp = order_dict["order"].get("statusTimestamp")
+    else:
+        order_info = order_dict
+        status = order_dict.get("status", "N/A")
+        status_timestamp = order_dict.get("statusTimestamp")
+
     table = Table(
         title="Current Order Status",
         title_style="bold bright_cyan",
@@ -37,6 +50,23 @@ def _display_order_status(console: Console, order_info: dict) -> None:
     click.echo()
     table.add_column("Field", style="bold")
     table.add_column("Value")
+
+    if status != "N/A":
+        status_color = (
+            "green"
+            if status == "filled"
+            else "yellow"
+            if status == "open"
+            else "red"
+            if status == "canceled"
+            else "white"
+        )
+        table.add_row("Status", f"[{status_color}]{status.upper()}[/{status_color}]")
+
+    if status_timestamp:
+        ts = datetime.fromtimestamp(status_timestamp / 1000)
+        table.add_row("Status Updated", ts.strftime("%Y-%m-%d %H:%M:%S"))
+
     table.add_row("Order ID", str(order_info.get("oid", "N/A")))
     table.add_row("Coin", order_info.get("coin", "N/A"))
     table.add_row("Side", "Buy" if order_info.get("side") == "B" else "Sell")
@@ -169,7 +199,7 @@ def new_order_run(
             if order_info.get("status") != "unknownOid":
                 console = Console()
                 console.log(order_info)
-                _display_order_status(console, order_info["order"]["order"])
+                _display_order_status(console, order_info)
                 raise click.ClickException(
                     f"CLOID {client_order_id} is already in use."
                 )
@@ -204,8 +234,7 @@ def new_order_run(
             try:
                 order_status = info.query_order_by_oid(address, int(order_id))
                 if order_status.get("status") == "order":
-                    order_info = order_status["order"]["order"]
-                    _display_order_status(console, order_info)
+                    _display_order_status(console, order_status)
             except Exception:
                 pass
 
@@ -241,9 +270,10 @@ def modify_order_run(
         raise click.ClickException(
             "Order is not in a modifiable state or cannot be found."
         )
-    order_info = order_status["order"]["order"]
     console = Console()
-    _display_order_status(console, order_info)
+    _display_order_status(console, order_status)
+
+    order_info = order_status["order"]["order"]
 
     new_order: dict[str, Any] = {
         "coin": coin if coin is not None else order_info["coin"],
@@ -314,7 +344,7 @@ def cancel_order_run(
         order = (
             info.query_order_by_oid(address, int(oid_or_cloid))
             if oid_or_cloid.isdigit()
-            else info.query_order_by_cloid(address, Cloid.from_str(oid_or_cloid))
+            else info.query_order_by_cloid(address, parse_cloid(oid_or_cloid))
         )
         coin = order["order"]["order"]["coin"]
         order_id = order["order"]["order"]["oid"]
