@@ -117,6 +117,42 @@ Signer Wallet Balances
 
 #### `withdraw`
 
+> [!NOTE]  
+> This will withdraw USDC balance via the Arbitrum bridge. When no `destination` is provided it will default to the HL account address.
+
+```sh
+uv run hlexec withdraw 2 --no-confirm
+Session Info                                             
+ Environment  testnet                                    
+ HL Account   0xb764428a29EAEbe8e2301F5924746F818b331F5A 
+ Signer       0x57FbAe717f5712C3Bd612f34482832c86D9b17f2 
+HyperLiquid Core Balance                             
+ Account  0xb764428a29EAEbe8e2301F5924746F818b331F5A 
+ Balance                                     $908.93 
+
+💸 Withdrawal Amount: $2.00
+💰 Amount after fee: $1.00 (fee: $1.00)
+📍 Destination: 0x57FbAe717f5712C3Bd612f34482832c86D9b17f2
+
+✅ Withdrawal initiated successfully
+⠙ Waiting for balance update...
+
+
+        Withdrawal Summary         
+╔═════════════════╦═══════════════╗
+║ Requested       ║         $2.00 ║
+║ Net Amount      ║         $1.00 ║
+║ Fee             ║         $1.00 ║
+║                 ║               ║
+║ Initial Balance ║       $908.93 ║
+║ Final Balance   ║       $908.74 ║
+║ Balance Change  ║        -$0.19 ║
+║ Status          ║ ⏳ PROCESSING ║
+╚═════════════════╩═══════════════╝
+
+⏳ Note: Withdrawal to Arbitrum typically takes ~5 minutes to finalize.
+```
+
 #### `transfer`
 
 #### `order new`

@@ -8,6 +8,7 @@ from rich.table import Table
 from rich.text import Text
 from rich import box
 from decimal import Decimal
+from web3 import Web3
 import time
 
 
@@ -20,7 +21,6 @@ def run(
     destination_address: str | None = None,
 ) -> None:
     """Withdraw USDC from HyperLiquid Core to EVM (Arbitrum)"""
-    from web3 import Web3
 
     info, exchange, address, account = setup(production, private_key, account_address)
 
