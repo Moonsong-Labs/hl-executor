@@ -100,10 +100,7 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
         value = p.get("positionValue") or p.get("value")
         upnl = p.get("unrealizedPnl")
         margin_used = p.get("marginUsed")
-        if upnl is not None and margin_used and margin_used != 0:
-            try:
-                roe = float(upnl) / float(margin_used)
-            except (ValueError, TypeError, ZeroDivisionError):
+            except (ValueError, TypeError):
                 roe = p.get("returnOnEquity")  # Fallback to API value
         else:
             roe = p.get("returnOnEquity")  # Use API value if calculation not possible
