@@ -26,6 +26,7 @@ def run(
 
     console = Console()
     initial_hl_balance = _get_hl_usd_balance(info, address)
+    withdrawable_balance = _get_withdrawable_balance(info, address)
 
     if destination_address:
         destination = Web3.to_checksum_address(destination_address)
@@ -42,12 +43,12 @@ def run(
             f"Minimum withdrawal amount is $2 (includes $1 fee). Requested: ${withdraw_amount:.2f}"
         )
 
-    if initial_hl_balance < float(withdraw_amount):
+    if withdrawable_balance < float(withdraw_amount):
         raise click.ClickException(
-            f"Insufficient HyperLiquid balance. Have: ${initial_hl_balance:.2f}, Need: ${withdraw_amount:.2f}"
+            f"Insufficient withdrawable balance. Available: ${withdrawable_balance:.2f}, Requested: ${withdraw_amount:.2f}"
         )
 
-    _render_initial_balance(console, initial_hl_balance, address)
+    _render_initial_balance(console, initial_hl_balance, withdrawable_balance, address)
 
     net_amount = float(withdraw_amount) - 1.0  # Subtract $1 fee
     console.print(f"\n💸 Withdrawal Amount: ${withdraw_amount:.2f}")
@@ -118,7 +119,19 @@ def _get_hl_usd_balance(info: Any, address: str) -> float:
         return 0.0
 
 
-def _render_initial_balance(console: Console, balance: float, address: str) -> None:
+def _get_withdrawable_balance(info: Any, address: str) -> float:
+    """Get the withdrawable USD balance from HyperLiquid Core"""
+    try:
+        state = info.user_state(address)
+        withdrawable = float(state.get("withdrawable", 0))
+        return withdrawable
+    except Exception:
+        return 0.0
+
+
+def _render_initial_balance(
+    console: Console, total_balance: float, withdrawable: float, address: str
+) -> None:
     """Render the initial balance table"""
     table = Table(
         show_header=False,
@@ -131,7 +144,8 @@ def _render_initial_balance(console: Console, balance: float, address: str) -> N
     table.add_column("Field", style="bold cyan", no_wrap=True)
     table.add_column("Value", justify="right")
     table.add_row("Account", address)
-    table.add_row("Balance", f"${balance:.2f}")
+    table.add_row("Total Balance", f"${total_balance:.2f}")
+    table.add_row("Withdrawable", f"${withdrawable:.2f}")
     console.print(table)
 
 
