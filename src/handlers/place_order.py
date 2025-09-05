@@ -9,8 +9,6 @@ from rich.text import Text
 from rich import box
 from .setup import setup, parse_cloid
 
-## TODO: Allow Multiple deletes
-
 
 def _parse_order_response(response: dict) -> list[dict[str, str]]:
     """Parse the common structure of order placement/cancellation API responses."""
@@ -166,6 +164,15 @@ def new_order_run(
 
     try:
         cloid = parse_cloid(client_order_id) if client_order_id else None
+        if cloid:
+            order_info = info.query_order_by_cloid(address, cloid)
+            if order_info.get("status") != "unknownOid":
+                console = Console()
+                console.log(order_info)
+                _display_order_status(console, order_info["order"]["order"])
+                raise click.ClickException(
+                    f"CLOID {client_order_id} is already in use."
+                )
     except ValueError as e:
         console = Console()
         console.print(f"[bold red]Error: {e}[/bold red]")

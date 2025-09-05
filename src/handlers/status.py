@@ -19,9 +19,14 @@ def _colorize_number(value: str | float | int | None, suffix: str = "") -> Text:
         return Text(str(value))
     style = "green" if num > 0 else ("red" if num < 0 else "")
     if suffix == "%":
-        txt = f"{num:.2f}{suffix}"
+        # For percentages, multiply by 100 and format to 2 decimal places
+        txt = f"{num * 100:.2f}{suffix}"
     else:
-        txt = f"{num}{suffix}"
+        # For non-percentages, format as integer if it's a whole number
+        if num == int(num):
+            txt = f"{int(num)}{suffix}"
+        else:
+            txt = f"{num}{suffix}"
     return Text(txt, style=style)
 
 
@@ -79,7 +84,7 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
         liq_px = p.get("liquidationPx")
         margin_used = p.get("marginUsed")
 
-        roe_text = _colorize_number(float(roe) * 100 if roe is not None else None, "%")
+        roe_text = _colorize_number(roe, "%")
         upnl_text = _colorize_number(upnl)
 
         table.add_row(
