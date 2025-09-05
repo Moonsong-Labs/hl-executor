@@ -26,11 +26,11 @@ def _colorize_number(
     if suffix == "%":
         # For percentages, check if value is already in percentage form
         if is_already_percentage:
-            # Value is already a percentage (e.g., 0.05 for 5%), multiply by 100
-            txt = f"{num * 100:.2f}{suffix}"
-        else:
             # Value is already in display form (e.g., 5 for 5%)
             txt = f"{num:.2f}{suffix}"
+        else:
+            # Value is a decimal (e.g., 0.05 for 5%), multiply by 100
+            txt = f"{num * 100:.2f}{suffix}"
     else:
         # For non-percentages, format as integer if it's a whole number
         if num == int(num):
