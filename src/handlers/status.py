@@ -80,7 +80,14 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
 
     for p in positions:
         coin = str(p.get("coin", "-"))
-        size = str(p.get("szi") or p.get("sz") or "-")
+        size_raw = p.get("szi") or p.get("sz")
+        if size_raw is not None:
+            try:
+                size = str(abs(float(size_raw)))
+            except (ValueError, TypeError):
+                size = str(size_raw)
+        else:
+            size = "-"
         lev = p.get("leverage")
         if isinstance(lev, dict):
             lev_str = (
@@ -92,9 +99,15 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
         entry_px = p.get("entryPx")
         value = p.get("positionValue") or p.get("value")
         upnl = p.get("unrealizedPnl")
-        roe = p.get("returnOnEquity")
-        liq_px = p.get("liquidationPx")
         margin_used = p.get("marginUsed")
+        if upnl is not None and margin_used and margin_used != 0:
+            try:
+                roe = float(upnl) / float(margin_used)
+            except (ValueError, TypeError, ZeroDivisionError):
+                roe = p.get("returnOnEquity")  # Fallback to API value
+        else:
+            roe = p.get("returnOnEquity")  # Use API value if calculation not possible
+        liq_px = p.get("liquidationPx")
 
         roe_text = _colorize_number(roe, "%", is_already_percentage=True)
         upnl_text = _colorize_number(upnl)
