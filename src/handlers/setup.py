@@ -1,5 +1,8 @@
 from __future__ import annotations
-from typing import Optional, Tuple, Any
+from hyperliquid.utils.types import Cloid
+from eth_typing.evm import ChecksumAddress
+from typing import Optional, Tuple
+from web3 import Web3
 from hyperliquid.info import Info
 from hyperliquid.utils import constants
 from hyperliquid.exchange import Exchange
@@ -7,6 +10,7 @@ import eth_account
 from eth_account.signers.local import LocalAccount
 from rich.table import Table
 from rich.console import Console
+import re
 
 import click
 import os
@@ -25,22 +29,22 @@ def _resolve_private_key(cli_private_key: Optional[str]) -> str:
     return env_key
 
 
-def _resolve_account_address(cli_account_address: Optional[str]) -> str:
+def _resolve_account_address(cli_account_address: Optional[str]) -> ChecksumAddress:
     """Choose account address from CLI if provided, else from env (.env loaded)."""
     if cli_account_address:
-        return cli_account_address
+        return Web3.to_checksum_address(cli_account_address)
 
     env_address = os.getenv("ACCOUNT_ADDRESS")
     if not env_address:
         raise click.ClickException(
             "Missing account address. Provide --address or set ACCOUNT_ADDRESS in .env"
         )
-    return env_address
+    return Web3.to_checksum_address(env_address)
 
 
 def setup(
     production: bool, private_key: Optional[str], account_address: Optional[str]
-) -> Tuple[Any, Any, str, LocalAccount]:
+) -> Tuple[Info, Exchange, str, LocalAccount]:
     """Initialize Hyperliquid SDK clients and return (info, exchange, address).
 
     - If `private_key` is provided, use it; otherwise load from .env (PRIVATE_KEY).
@@ -48,7 +52,7 @@ def setup(
     """
     pk = _resolve_private_key(private_key)
     address = _resolve_account_address(account_address)
-    account: LocalAccount = eth_account.Account.from_key(pk)
+    account = eth_account.Account.from_key(pk)  # type: ignore[attr-defined]
     base_url = constants.MAINNET_API_URL if production else constants.TESTNET_API_URL
 
     info = Info(base_url, skip_ws=True)
@@ -78,3 +82,42 @@ def _render_header(
     hdr.add_row("HL Account", address)
     hdr.add_row("Signer", signer)
     console.print(hdr)
+
+
+def parse_cloid(cloid_input: str) -> Cloid:
+    """
+    Parse a cloid input that can be either:
+    - A decimal integer (e.g., "123456")
+    - A hexadecimal string with 0x prefix (e.g., "0x1e240")
+
+    Returns a Cloid object with proper 16-byte hex formatting.
+    """
+    if not cloid_input:
+        raise ValueError("Cloid input cannot be empty")
+
+    if cloid_input.startswith("0x"):
+        if not re.fullmatch(r"0x[0-9a-fA-F]+", cloid_input):
+            raise ValueError(f"Invalid hexadecimal Cloid format: {cloid_input}")
+        try:
+            cloid_int = int(cloid_input, 16)
+        except ValueError:
+            raise ValueError(f"Invalid hexadecimal Cloid value: {cloid_input}")
+    elif re.fullmatch(r"[0-9]+", cloid_input):
+        try:
+            cloid_int = int(cloid_input, 10)
+        except ValueError:
+            raise ValueError(f"Invalid decimal Cloid value: {cloid_input}")
+    else:
+        raise ValueError(
+            f"Cloid must be a decimal integer or hexadecimal string with 0x prefix "
+            f"(e.g., '123' or '0x7b'): {cloid_input}"
+        )
+
+    MAX_16_BYTE_INT = (1 << 128) - 1
+    if not (0 <= cloid_int <= MAX_16_BYTE_INT):
+        raise ValueError(
+            f"Cloid integer value {cloid_int} is out of 16-byte range "
+            f"(0 to {MAX_16_BYTE_INT})"
+        )
+
+    return Cloid.from_int(cloid_int)

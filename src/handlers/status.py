@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
-from typing import Any, Dict, List
+from decimal import Decimal
+from typing import Any, Dict, List, Union
 import click
 from rich.console import Console
 from rich.table import Table
@@ -9,7 +10,11 @@ from rich import box
 from .setup import setup
 
 
-def _colorize_number(value: str | float | int | None, suffix: str = "") -> Text:
+def _colorize_number(
+    value: Union[str, float, int, Decimal, None],
+    suffix: str = "",
+    is_already_percentage: bool = False,
+) -> Text:
     """Return a Text with green for positive, red for negative."""
     if value is None:
         return Text("-")
@@ -19,13 +24,25 @@ def _colorize_number(value: str | float | int | None, suffix: str = "") -> Text:
         return Text(str(value))
     style = "green" if num > 0 else ("red" if num < 0 else "")
     if suffix == "%":
-        txt = f"{num:.2f}{suffix}"
+        # For percentages, check if value is already in percentage form
+        if is_already_percentage:
+            # Value is already in display form (e.g., 5 for 5%)
+            txt = f"{num:.2f}{suffix}"
+        else:
+            # Value is a decimal (e.g., 0.05 for 5%), multiply by 100
+            txt = f"{num * 100:.2f}{suffix}"
     else:
-        txt = f"{num}{suffix}"
+        # For non-percentages, format as integer if it's a whole number
+        if num == int(num):
+            txt = f"{int(num)}{suffix}"
+        else:
+            txt = f"{num}{suffix}"
     return Text(txt, style=style)
 
 
-def _normalize_positions(raw_positions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _normalize_positions(
+    raw_positions: List[Dict[str, Any]] | None,
+) -> List[Dict[str, Any]]:
     """Flatten possible wrapper formats to a consistent position dict list."""
     normalized: List[Dict[str, Any]] = []
     for item in raw_positions or []:
@@ -63,7 +80,14 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
 
     for p in positions:
         coin = str(p.get("coin", "-"))
-        size = str(p.get("szi") or p.get("sz") or "-")
+        size_raw = p.get("szi") or p.get("sz")
+        if size_raw is not None:
+            try:
+                size = str(abs(float(size_raw)))
+            except (ValueError, TypeError):
+                size = str(size_raw)
+        else:
+            size = "-"
         lev = p.get("leverage")
         if isinstance(lev, dict):
             lev_str = (
@@ -75,11 +99,19 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
         entry_px = p.get("entryPx")
         value = p.get("positionValue") or p.get("value")
         upnl = p.get("unrealizedPnl")
-        roe = p.get("returnOnEquity")
-        liq_px = p.get("liquidationPx")
         margin_used = p.get("marginUsed")
 
-        roe_text = _colorize_number(float(roe) * 100 if roe is not None else None, "%")
+        try:
+            if margin_used and upnl:
+                roe = (float(upnl) / float(margin_used)) * 100
+            else:
+                roe = p.get("returnOnEquity")
+        except (ValueError, TypeError):
+            roe = p.get("returnOnEquity")  # Fallback to API value
+
+        liq_px = p.get("liquidationPx")
+
+        roe_text = _colorize_number(roe, "%", is_already_percentage=True)
         upnl_text = _colorize_number(upnl)
 
         table.add_row(

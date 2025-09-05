@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches:
+      - master
   pull_request:
 
 jobs:
@@ -35,8 +37,8 @@ jobs:
       - name: Check formatting
         run: uv run ruff format --check .
 
-  mypy:
-    name: Mypy Type Check
+  pyrefly:
+    name: Pyrefly Type Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,7 +50,7 @@ jobs:
       - name: Sync project dependencies (frozen)
         run: uv sync --frozen
       - name: Type check
-        run: uv run mypy
+        run: uv run pyrefly check
 
   cli_help:
     name: CLI --help
@@ -64,3 +66,18 @@ jobs:
         run: uv sync --frozen
       - name: Ensure CLI help succeeds
         run: uv run hlexec --help
+  
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Sync project dependencies (frozen)
+        run: uv sync --frozen
+      - name: Run tests
+        run: uv run python -m unittest discover

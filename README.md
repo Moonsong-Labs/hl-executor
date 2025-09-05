@@ -114,3 +114,117 @@ Signer Wallet Balances
 ║ Status        ║ ✅ SUCCESS ║
 ╚═══════════════╩════════════╝
 ```
+
+#### `withdraw`
+
+#### `transfer`
+
+#### `order new`
+
+> [!NOTE]  
+> This will submit a limit order to the perps dex on HyperCore
+
+```sh
+uv run hlexec order new DOGE buy 100 0.1 --cloid 0xDEADBEEF
+Session Info                                             
+ Environment  testnet                                    
+ HL Account   0xb764428a29EAEbe8e2301F5924746F818b331F5A 
+ Signer       0x57FbAe717f5712C3Bd612f34482832c86D9b17f2 
+
+                      Order Result                      
+╭─────────────────┬────────────────────────────────────╮
+│ Field           │ Value                              │
+├─────────────────┼────────────────────────────────────┤
+│ Order ID        │ 38750312717                        │
+│ Client Order ID │ 0x000000000000000000000000deadbeef │
+╰─────────────────┴────────────────────────────────────╯
+
+                  Current Order Status                  
+╭─────────────────┬────────────────────────────────────╮
+│ Field           │ Value                              │
+├─────────────────┼────────────────────────────────────┤
+│ Order ID        │ 38750312717                        │
+│ Coin            │ DOGE                               │
+│ Side            │ Buy                                │
+│ Size            │ 100.0                              │
+│ Price           │ 0.1                                │
+│ Order Type      │ Limit                              │
+│ Time in Force   │ Gtc                                │
+│ Reduce Only     │ No                                 │
+│ Client Order ID │ 0x000000000000000000000000deadbeef │
+│ Created         │ 2025-09-05 13:02:12                │
+╰─────────────────┴────────────────────────────────────╯
+```
+
+#### `order modify`
+
+> [!NOTE]  
+> You can modify an existing order by other oid (automatically assigned), or cloid (optionally assigned if provided during new order). Provide the options of the fields you wish to change.
+
+```sh
+ uv run hlexec order modify 38750312717 --price 0.12
+Session Info                                             
+ Environment  testnet                                    
+ HL Account   0xb764428a29EAEbe8e2301F5924746F818b331F5A 
+ Signer       0x57FbAe717f5712C3Bd612f34482832c86D9b17f2 
+
+                  Current Order Status                  
+╭─────────────────┬────────────────────────────────────╮
+│ Field           │ Value                              │
+├─────────────────┼────────────────────────────────────┤
+│ Order ID        │ 38750312717                        │
+│ Coin            │ DOGE                               │
+│ Side            │ Buy                                │
+│ Size            │ 100.0                              │
+│ Price           │ 0.1                                │
+│ Order Type      │ Limit                              │
+│ Time in Force   │ Gtc                                │
+│ Reduce Only     │ No                                 │
+│ Client Order ID │ 0x000000000000000000000000deadbeef │
+│ Created         │ 2025-09-05 13:02:12                │
+╰─────────────────┴────────────────────────────────────╯
+
+                      Order Result                      
+╭─────────────────┬────────────────────────────────────╮
+│ Field           │ Value                              │
+├─────────────────┼────────────────────────────────────┤
+│ Order ID        │ 38750415618                        │
+│ Client Order ID │ 0x000000000000000000000000deadbeef │
+╰─────────────────┴────────────────────────────────────╯
+```
+
+#### `order cancel`
+
+> [!NOTE]  
+> Whilst you can cancel an order via `oid` or `cloid`, it is recommended to use `oid` which is enforced as unique.
+
+```sh
+uv run hlexec order cancel 38750415618
+Session Info                                             
+ Environment  testnet                                    
+ HL Account   0xb764428a29EAEbe8e2301F5924746F818b331F5A 
+ Signer       0x57FbAe717f5712C3Bd612f34482832c86D9b17f2 
+
+   Cancel Order Result    
+╭──────────┬─────────────╮
+│ Order ID │ 38750415618 │
+│ Status   │ success     │
+╰──────────┴─────────────╯
+```
+
+## Testing
+
+> [!IMPORTANT]  
+> Ensure dependencies are installed: `uv sync`
+
+- Run the full test suite (explicit discovery):
+
+  ```sh
+   uv run python -m unittest discover
+  ```
+
+- Run a single test file:
+
+  ```sh
+  uv run python -m unittest tests/test_setup_parse_cloid.py -v
+  ```

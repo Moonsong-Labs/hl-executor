@@ -17,6 +17,7 @@ dependencies = [
     "mypy>=1.17.1",
     "ruff>=0.12.11",
     "web3>=7.13.0",
+    "pyrefly>=0.31.0",
 ]
 
 [project.scripts]
@@ -34,17 +35,6 @@ py-modules = ["hl_executor", "constants"]
 where = ["src"]
 include = ["handlers*"]
 
-[tool.mypy]
-python_version = "3.10"
-# Ensure mypy resolves imports from the flat `src/` layout
-mypy_path = "src"
-# What to check by default when running just `mypy`
-files = ["src"]
-warn_unused_ignores = true
-warn_redundant_casts = true
-warn_return_any = true
-no_implicit_optional = true
-pretty = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -59,3 +49,19 @@ module = [
   "rich.*",
 ]
 ignore_missing_imports = true
+
+[tool.pyrefly]
+project-includes = ["src","tests"]
+search-path = ["src", "tests"]
+python-version = "3.10.0"
+ignore-missing-imports = [
+    "hyperliquid",
+    "hyperliquid.*",
+    "eth_account",
+    "eth_account.*",
+    "web3",
+    "web3.*",
+    "dotenv",
+    "rich",
+    "rich.*",
+]
