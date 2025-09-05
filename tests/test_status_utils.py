@@ -12,10 +12,10 @@ from handlers import status as st
 class TestStatusUtils(unittest.TestCase):
     def test_colorize_number_positive_negative_zero(self):
         self.assertEqual(st._colorize_number(5).plain, "5")
-        self.assertIn("green", st._colorize_number(5).style or "")
+        self.assertIn("green", str(st._colorize_number(5).style) if st._colorize_number(5).style else "")
 
         self.assertEqual(st._colorize_number(-3).plain, "-3")
-        self.assertIn("red", st._colorize_number(-3).style or "")
+        self.assertIn("red", str(st._colorize_number(-3).style) if st._colorize_number(-3).style else "")
 
         self.assertEqual(st._colorize_number(0).plain, "0")
         self.assertEqual(st._colorize_number(0).style, "")
@@ -31,7 +31,7 @@ class TestStatusUtils(unittest.TestCase):
             "bad",
             {"position": "also bad"},
         ]
-        out = st._normalize_positions(raw)
+        out = st._normalize_positions(raw)  # type: ignore
         self.assertEqual(out, [{"coin": "BTC", "sz": 1}, {"coin": "ETH", "sz": 2}])
 
 

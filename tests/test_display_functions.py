@@ -97,7 +97,7 @@ class TestDisplayFunctions(unittest.TestCase):
 
     def test_display_cancel_result_success(self):
         """Test cancel result display for successful cancellation"""
-        result_data = ["success"]
+        result_data = [{"status": "success"}]
 
         with patch("handlers.place_order.click.echo"):
             _display_cancel_result(self.mock_console, result_data, 12345)

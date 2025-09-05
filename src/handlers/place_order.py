@@ -9,8 +9,10 @@ from rich import box
 from .setup import setup, parse_cloid
 
 
-def _parse_order_response(response: dict) -> list[dict[str, str]]:
+def _parse_order_response(response: dict | None) -> list[dict[str, str]]:
     """Parse the common structure of order placement/cancellation API responses."""
+    if response is None:
+        return [{"error": "Response is None"}]
     if response.get("status") != "ok":
         return [{"error": f"API returned non-ok status: {response.get('status')}"}]
 

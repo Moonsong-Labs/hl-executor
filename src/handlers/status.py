@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
-from typing import Any, Dict, List
+from decimal import Decimal
+from typing import Any, Dict, List, Union
 import click
 from rich.console import Console
 from rich.table import Table
@@ -9,7 +10,7 @@ from rich import box
 from .setup import setup
 
 
-def _colorize_number(value: str | float | int | None, suffix: str = "") -> Text:
+def _colorize_number(value: Union[str, float, int, Decimal, None], suffix: str = "") -> Text:
     """Return a Text with green for positive, red for negative."""
     if value is None:
         return Text("-")
@@ -30,7 +31,7 @@ def _colorize_number(value: str | float | int | None, suffix: str = "") -> Text:
     return Text(txt, style=style)
 
 
-def _normalize_positions(raw_positions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _normalize_positions(raw_positions: List[Dict[str, Any]] | None) -> List[Dict[str, Any]]:
     """Flatten possible wrapper formats to a consistent position dict list."""
     normalized: List[Dict[str, Any]] = []
     for item in raw_positions or []:
