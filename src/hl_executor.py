@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from handlers.status import run as status_run
 from handlers.deposit import run as deposit_run
 from handlers.place_order import cancel_order_run, new_order_run, modify_order_run
+from handlers.withdraw import run as withdraw_run
 
 
 @click.group()
@@ -295,9 +296,58 @@ def leverage():
 
 
 @cli.command()
-def withdraw():
+@click.argument(
+    "amount",
+    type=str,
+)
+@click.argument(
+    "destination",
+    type=str,
+    required=False,
+)
+@click.option(
+    "--private-key",
+    "private_key",
+    type=str,
+    required=False,
+    help="Private key for signing transactions",
+)
+@click.option(
+    "--production",
+    "production",
+    is_flag=True,
+    help="Connect to the production environment (default is testnet)",
+)
+@click.option(
+    "--address",
+    "account_address",
+    type=str,
+    required=False,
+    help="This the HL account address which the Action will be performed on",
+)
+@click.option(
+    "--no-confirm",
+    "no_confirm",
+    is_flag=True,
+    help="Skip confirmation prompt and proceed directly with withdrawal",
+)
+def withdraw(
+    amount: str,
+    private_key: str | None,
+    production: bool,
+    account_address: str | None,
+    no_confirm: bool,
+    destination: str | None,
+):
     """Withdraw Funds from Core -> EVM"""
-    click.echo("Welcome to the Withdraw Funds from Core -> EVM command!")
+    withdraw_run(
+        production,
+        private_key,
+        account_address,
+        amount,
+        no_confirm,
+        destination,
+    )
 
 
 @cli.command()
