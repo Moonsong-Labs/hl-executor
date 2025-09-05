@@ -11,7 +11,9 @@ from .setup import setup
 
 
 def _colorize_number(
-    value: Union[str, float, int, Decimal, None], suffix: str = ""
+    value: Union[str, float, int, Decimal, None],
+    suffix: str = "",
+    is_already_percentage: bool = False,
 ) -> Text:
     """Return a Text with green for positive, red for negative."""
     if value is None:
@@ -22,8 +24,13 @@ def _colorize_number(
         return Text(str(value))
     style = "green" if num > 0 else ("red" if num < 0 else "")
     if suffix == "%":
-        # For percentages, multiply by 100 and format to 2 decimal places
-        txt = f"{num * 100:.2f}{suffix}"
+        # For percentages, check if value is already in percentage form
+        if is_already_percentage:
+            # Value is already a percentage (e.g., 0.05 for 5%), multiply by 100
+            txt = f"{num * 100:.2f}{suffix}"
+        else:
+            # Value is already in display form (e.g., 5 for 5%)
+            txt = f"{num:.2f}{suffix}"
     else:
         # For non-percentages, format as integer if it's a whole number
         if num == int(num):
@@ -89,7 +96,7 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
         liq_px = p.get("liquidationPx")
         margin_used = p.get("marginUsed")
 
-        roe_text = _colorize_number(roe, "%")
+        roe_text = _colorize_number(roe, "%", is_already_percentage=True)
         upnl_text = _colorize_number(upnl)
 
         table.add_row(
