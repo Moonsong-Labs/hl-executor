@@ -114,3 +114,16 @@ Signer Wallet Balances
 ║ Status        ║ ✅ SUCCESS ║
 ╚═══════════════╩════════════╝
 ```
+
+#### `withdraw`
+
+#### `transfer`
+
+
+#### `order new`
+
+#### `order modify`
+
+#### `order cancel`
+
+## Testing

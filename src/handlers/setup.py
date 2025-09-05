@@ -1,4 +1,5 @@
 from __future__ import annotations
+from hyperliquid.utils.types import Cloid
 from eth_typing.evm import ChecksumAddress
 from typing import Optional, Tuple
 from web3 import Web3
@@ -9,6 +10,7 @@ import eth_account
 from eth_account.signers.local import LocalAccount
 from rich.table import Table
 from rich.console import Console
+import re
 
 import click
 import os
@@ -80,3 +82,43 @@ def _render_header(
     hdr.add_row("HL Account", address)
     hdr.add_row("Signer", signer)
     console.print(hdr)
+
+
+def parse_cloid(cloid_input: str) -> Cloid:
+    """
+    Parse a cloid input that can be either:
+    - A decimal integer (e.g., "123456")
+    - A hexadecimal string with 0x prefix (e.g., "0x1e240")
+    - A hexadecimal string without 0x prefix (e.g., "1e240")
+
+    Returns a Cloid object with proper 16-byte hex formatting.
+    """
+    if not cloid_input:
+        raise ValueError("Cloid input cannot be empty")
+
+    if cloid_input.startswith("0x"):
+        if not re.fullmatch(r"0x[0-9a-fA-F]+", cloid_input):
+            raise ValueError(f"Invalid hexadecimal Cloid format: {cloid_input}")
+        try:
+            cloid_int = int(cloid_input, 16)
+        except ValueError:
+            raise ValueError(f"Invalid hexadecimal Cloid value: {cloid_input}")
+    elif re.fullmatch(r"[0-9]+", cloid_input):
+        try:
+            cloid_int = int(cloid_input, 10)
+        except ValueError:
+            raise ValueError(f"Invalid decimal Cloid value: {cloid_input}")
+    else:
+        raise ValueError(
+            f"Cloid must be a decimal integer or hexadecimal string with 0x prefix "
+            f"(e.g., '123' or '0x7b'): {cloid_input}"
+        )
+
+    MAX_16_BYTE_INT = (1 << 128) - 1
+    if not (0 <= cloid_int <= MAX_16_BYTE_INT):
+        raise ValueError(
+            f"Cloid integer value {cloid_int} is out of 16-byte range "
+            f"(0 to {MAX_16_BYTE_INT})"
+        )
+
+    return Cloid.from_int(cloid_int)

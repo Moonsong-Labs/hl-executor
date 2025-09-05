@@ -3,6 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from handlers.status import run as status_run
 from handlers.deposit import run as deposit_run
+from handlers.place_order import cancel_order_run, new_order_run, modify_order_run
 
 
 @click.group()
@@ -112,8 +113,6 @@ def new(
     reduce_only: bool,
 ):
     """Place a new limit order"""
-    from handlers.place_order import new_order_run
-
     new_order_run(
         coin,
         direction.lower() == "buy",
@@ -179,6 +178,12 @@ def new(
     required=False,
     help="New client order ID",
 )
+@click.option(
+    "--reduce-only",
+    "reduce_only",
+    is_flag=True,
+    help="Reduce only order",
+)
 def modify(
     oid_or_cloid: str,
     coin: str | None,
@@ -189,10 +194,9 @@ def modify(
     account_address: str | None,
     time_in_force: str | None,
     client_order_id: str | None,
+    reduce_only: bool | None,
 ):
     """Modify an existing order by OID or CLOID"""
-    from handlers.place_order import modify_order_run
-
     modify_order_run(
         oid_or_cloid,
         coin,
@@ -203,11 +207,11 @@ def modify(
         account_address,
         time_in_force,
         client_order_id,
+        reduce_only,
     )
 
 
 @order.command()
-@click.argument("coin", type=str)
 @click.argument("oid", type=str)
 @click.option(
     "--private-key",
@@ -230,17 +234,13 @@ def modify(
     help="This the HL account address which the Action will be performed on",
 )
 def cancel(
-    coin: str,
     oid: str,
     private_key: str | None,
     production: bool,
     account_address: str | None,
 ):
     """Cancel an order by OID"""
-    from handlers.place_order import cancel_order_run
-
     cancel_order_run(
-        coin,
         oid,
         private_key,
         production,
