@@ -89,7 +89,6 @@ def parse_cloid(cloid_input: str) -> Cloid:
     Parse a cloid input that can be either:
     - A decimal integer (e.g., "123456")
     - A hexadecimal string with 0x prefix (e.g., "0x1e240")
-    - A hexadecimal string without 0x prefix (e.g., "1e240")
 
     Returns a Cloid object with proper 16-byte hex formatting.
     """
