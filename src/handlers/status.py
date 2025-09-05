@@ -100,10 +100,15 @@ def _render_positions(console: Console, positions: List[Dict[str, Any]]) -> None
         value = p.get("positionValue") or p.get("value")
         upnl = p.get("unrealizedPnl")
         margin_used = p.get("marginUsed")
-            except (ValueError, TypeError):
-                roe = p.get("returnOnEquity")  # Fallback to API value
-        else:
-            roe = p.get("returnOnEquity")  # Use API value if calculation not possible
+
+        try:
+            if margin_used and upnl:
+                roe = (float(upnl) / float(margin_used)) * 100
+            else:
+                roe = p.get("returnOnEquity")
+        except (ValueError, TypeError):
+            roe = p.get("returnOnEquity")  # Fallback to API value
+
         liq_px = p.get("liquidationPx")
 
         roe_text = _colorize_number(roe, "%", is_already_percentage=True)
